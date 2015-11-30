@@ -1,0 +1,42 @@
+store(cross_join(KDDnet_n000010K_d000010_dense as A, KDDnet_n000010K_d000010_dense as B, A.i, B.i), corssjoin);
+
+SET LANG AFL; SET NO FETCH;
+remove(Xsquared);
+store(
+  cross_join(
+     A
+    ,B
+    ,A.i,B.i
+  )
+ ,Xsquared);
+
+-- weird semantics with projection
+SET LANG AQL;
+SET NO FETCH;
+DROP ARRAY XsquaredLQ;
+SELECT
+ v     AS L_a
+,v_2   AS L_b
+,v*v   AS Q_aa
+,v_2*v_2 AS Q_bb
+,v*v_2   AS Q_ab
+INTO XsquaredLQ
+FROM Xsquared;
+
+--pending: triangular matrix, but no big time gain
+--SciDB woerks incorrectly with alias in GROUP BY ; useless to put GROUP BY columns in SELECT
+SET LANG AQL;
+SET NO FETCH;
+DROP ARRAY NLQ;
+SELECT
+  j AS a
+ ,j_2 AS b
+ ,count(*) AS n
+ ,sum(L_a) AS L_a
+ ,sum(L_b) AS L_b
+ ,sum(Q_aa) AS Q_aa
+ ,sum(Q_bb) AS Q_bb
+ ,sum(Q_ab) AS Q_ab
+INTO NLQ
+FROM XsquaredLQ
+GROUP BY j,j_2;

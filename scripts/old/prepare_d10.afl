@@ -1,0 +1,13 @@
+create array KDDnet_n000001M_d000010_1D <i:int64, j:int64, val:double> [k=1:*,100000,0];
+create array KDDnet_n000010M_d000010_1D <i:int64, j:int64, val:double> [k=1:*,100000,0];
+create array KDDnet_n000100M_d000010_1D <i:int64, j:int64, val:double> [k=1:*,100000,0];
+create array KDDnet_n000001M_d000010 <val:double> [i=1:1000000,10000,0,j=1:10,10,0];
+create array KDDnet_n000010M_d000010 <val:double> [i=1:10000000,10000,0,j=1:10,10,0];
+create array KDDnet_n000100M_d000010 <val:double> [i=1:100000000,10000,0,j=1:10,10,0];
+set no fetch;
+load(KDDnet_n000001M_d000010_1D, '/home/scidb/yzhang/Gamma/csv_files/n000001M_d000010.scidb', -2);
+load(KDDnet_n000010M_d000010_1D, '/home/scidb/yzhang/Gamma/csv_files/n000010M_d000010.scidb', -2);
+load(KDDnet_n000100M_d000010_1D, '/home/scidb/yzhang/Gamma/csv_files/n000100M_d000010.scidb', -2);
+store(redimension(KDDnet_n000001M_d000010_1D, KDDnet_n000001M_d000010), KDDnet_n000001M_d000010);
+store(redimension(KDDnet_n000010M_d000010_1D, KDDnet_n000010M_d000010), KDDnet_n000010M_d000010);
+store(redimension(KDDnet_n000100M_d000010_1D, KDDnet_n000100M_d000010), KDDnet_n000100M_d000010);
