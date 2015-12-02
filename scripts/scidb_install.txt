@@ -52,6 +52,14 @@ scp -r yzhang@linux04.cs.uh.edu:~/packages ./
 ---------------------------------------------------------------------
 sudo chown -R scidb:scidb /opt/scidb
 
+Add SciDB-R package:
+install.packages('scidb')
+
+Install shim:
+wget http://paradigm4.github.io/shim/ubuntu_14.04_shim_15.7_amd64.deb
+sudo apt-get install -y gdebi
+sudo gdebi ubuntu_14.04_shim_15.7_amd64.deb
+sudo service shimsvc start
 
 Add rs, scidbtime to /usr/local/bin
 Need to configure scidb to be a passwordless sudo user in /etc/sudoers

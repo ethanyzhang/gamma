@@ -51,7 +51,7 @@ public:
     ifstream fin;
     fin.open(fname.c_str(), ios::in);
     if ( ! fin.is_open()) {
-      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_CANT_OPEN_FILE) << fname;
+      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_CANT_OPEN_FILE) << fname << "Cannot open file" << 0;
     }
     fin.close();
 
