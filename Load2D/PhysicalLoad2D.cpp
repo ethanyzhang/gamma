@@ -140,6 +140,7 @@ public:
       outputChunkIter->flush();
     }
     #ifdef DEBUG
+    log << "Cleanning up..." << endl;
     fin.close();
     log.close();
     #endif

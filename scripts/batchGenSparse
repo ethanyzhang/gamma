@@ -25,10 +25,7 @@ for i in ${n[@]}; do
     for k in ${den[@]}; do
       strden=`echo "scale=0; $k*1000/1" | bc`
       name=`printf "n%sd%03dden%04d" $strn $j $strden`
-      cmd="scidbtime DenseGamma(${name}_dense);"
-      echo -e "\E[0;32m$cmd\E[0m"
-      $cmd
-      cmd="scidbtime SparseGamma(${name}_sparse);"
+      cmd="gensparse $name $i $j $k"
       echo -e "\E[0;32m$cmd\E[0m"
       $cmd
     done

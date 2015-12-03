@@ -93,7 +93,7 @@ public:
     // Note the correlation array doesn't have Y column.
     Coordinate p = corrDimsP.getCurrLength();
     
-    fprintf(logFile, "p = %ld\n # of chunk = %ld\n", p, corrSchema.getNumberOfChunks());
+    //fprintf(logFile, "p = %ld\n # of chunk = %ld\n", p, corrSchema.getNumberOfChunks());
     fflush(logFile);
     
     shared_ptr<ConstArrayIterator> corrArrayIter = correlationArray->getIterator(0);
