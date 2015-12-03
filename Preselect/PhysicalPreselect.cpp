@@ -24,7 +24,7 @@
  */
 
 #include <query/Operator.h>
-#include <query/Network.h>
+#include <util/Network.h>
 // We need quick sort.
 #include <stdlib.h>
 #include <math.h>

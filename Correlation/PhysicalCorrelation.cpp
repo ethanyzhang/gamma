@@ -26,7 +26,7 @@
 #include <query/Operator.h>
 #include <math.h>
 #include <sstream>
-#include <query/Network.h>
+#include <util/Network.h>
 using namespace std;
 
 namespace scidb {
