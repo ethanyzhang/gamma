@@ -53,7 +53,8 @@ scp -r yzhang@linux04.cs.uh.edu:~/packages ./
 sudo chown -R scidb:scidb /opt/scidb
 
 Add SciDB-R package:
-install.packages('scidb')
+install.packages('devtools')
+devtools::install_github("Paradigm4/SciDBR")
 
 Install shim:
 wget http://paradigm4.github.io/shim/ubuntu_14.04_shim_15.7_amd64.deb
