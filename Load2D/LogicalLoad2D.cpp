@@ -65,7 +65,8 @@ public:
     outputAttributes = addEmptyTagAttribute(outputAttributes);
 
     Dimensions outputDims;
-    outputDims.push_back( DimensionDesc("i", 1, n, CHUNK_SIZE, 0) ); 
+    int64_t chunkSize = n < CHUNK_SIZE ? n : CHUNK_SIZE;
+    outputDims.push_back( DimensionDesc("i", 1, n, chunkSize, 0) ); 
     outputDims.push_back( DimensionDesc("j", 1, d, d, 0) ); 
     return ArrayDesc("Load2DdArray", outputAttributes, outputDims, defaultPartitioning());
   }

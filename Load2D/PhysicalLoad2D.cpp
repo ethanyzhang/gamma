@@ -65,8 +65,9 @@ public:
     string fname = ((shared_ptr< OperatorParamPhysicalExpression>&)_parameters[0])->getExpression()->evaluate().getString();
     int64_t n = ((shared_ptr< OperatorParamPhysicalExpression>&)_parameters[1])->getExpression()->evaluate().getInt64();
     int64_t d = ((shared_ptr< OperatorParamPhysicalExpression>&)_parameters[2])->getExpression()->evaluate().getInt64();
+    int64_t chunkSize = n < CHUNK_SIZE ? n : CHUNK_SIZE;
     double *buf = new double[d];
-    int64_t totalChunks = (n-1) / CHUNK_SIZE + 1;
+    int64_t totalChunks = (n-1) / chunkSize + 1;
     int64_t chunksPerInstance = totalChunks / query->getInstancesCount();
     int64_t myStartChunkId = query->getInstanceID() * chunksPerInstance;
     int64_t myEndChunkId = myStartChunkId + chunksPerInstance - 1;
@@ -103,7 +104,7 @@ public:
 
     fin.seekg(0, ios::end);
     int64_t flen = fin.tellg();
-    int64_t offset = myStartChunkId * CHUNK_SIZE * d * sizeof(double);
+    int64_t offset = myStartChunkId * chunkSize * d * sizeof(double);
     offset = offset % flen;
     int64_t readLen = d * sizeof(double);
     fin.seekg(offset, ios::beg);
@@ -111,13 +112,13 @@ public:
     log << "Seek to " << offset << endl;
     #endif
     for (currChunkId=myStartChunkId; currChunkId<=myEndChunkId; currChunkId++) {
-      position[0] = currChunkId * CHUNK_SIZE + 1;
+      position[0] = currChunkId * chunkSize + 1;
       position[1] = 1;
       outputChunkIter = outputArrayIter->newChunk(position).getIterator(query, ChunkIterator::SEQUENTIAL_WRITE);
       #ifdef DEBUG
       log << "Create chunk at (" << position[0] << ", " << position[1] << ")" << endl;
       #endif
-      for (currRowId=0; currRowId<CHUNK_SIZE; currRowId++, position[0]++) {
+      for (currRowId=0; currRowId<chunkSize; currRowId++, position[0]++) {
         position[1] = 1;
         fin.read((char*)buf, readLen);
         if (fin.gcount() != readLen) {
