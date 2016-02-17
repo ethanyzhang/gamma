@@ -17,10 +17,10 @@
  */
 
 /*
- * @file LogicalLoad2D.cpp
+ * @file PhysicalLoad2D.cpp
  * @author Yiqun Zhang <zhangyiqun9164@gmail.com>
  *
- * @brief Logical part of the Load2D SciDB operator.
+ * @brief Physical part of the Load2D SciDB operator.
  */
 
 #include <query/Operator.h>
