@@ -79,24 +79,24 @@ public:
     }
 
     #ifdef DEBUG
-    stringstream ss;
-    ss << getenv("HOME") << "/load2d-instance-" << query->getInstanceID() << ".log";
-    log.open(ss.str().c_str(), ios::out);
-    log << "File name is " << fname << endl;
-    log << "n = " << n << endl << "d = " << d << endl;
-    log << "totalChunks = " << totalChunks << endl;
-    log << "chunksPerInstance = " << chunksPerInstance << endl;
-    log << "I am instance " << query->getInstanceID() << ", there are "
-        << query->getInstancesCount() << " instances." << endl;
-    log << "myStartChunkId = " << myStartChunkId << endl;
-    log << "myEndChunkId = " << myEndChunkId << endl;
+      stringstream ss;
+      ss << getenv("HOME") << "/load2d-instance-" << query->getInstanceID() << ".log";
+      log.open(ss.str().c_str(), ios::out);
+      log << "File name is " << fname << endl;
+      log << "n = " << n << endl << "d = " << d << endl;
+      log << "totalChunks = " << totalChunks << endl;
+      log << "chunksPerInstance = " << chunksPerInstance << endl;
+      log << "I am instance " << query->getInstanceID() << ", there are "
+          << query->getInstancesCount() << " instances." << endl;
+      log << "myStartChunkId = " << myStartChunkId << endl;
+      log << "myEndChunkId = " << myEndChunkId << endl;
     #endif
 
     if (myEndChunkId < myStartChunkId) {
       #ifdef DEBUG
-      log << "Nothing to be done on this instance, return." << endl;
-      fin.close();
-      log.close();
+        log << "Nothing to be done on this instance, return." << endl;
+        fin.close();
+        log.close();
       #endif
       delete[] buf;
       return outputArray;
@@ -109,21 +109,23 @@ public:
     int64_t readLen = d * sizeof(double);
     fin.seekg(offset, ios::beg);
     #ifdef DEBUG
-    log << "Seek to " << offset << endl;
+      log << "Seek to " << offset << endl;
+      bool rollback = false;
     #endif
     for (currChunkId=myStartChunkId; currChunkId<=myEndChunkId; currChunkId++) {
       position[0] = currChunkId * chunkSize + 1;
       position[1] = 1;
       outputChunkIter = outputArrayIter->newChunk(position).getIterator(query, ChunkIterator::SEQUENTIAL_WRITE);
       #ifdef DEBUG
-      log << "Create chunk at (" << position[0] << ", " << position[1] << ")" << endl;
+        log << "Create chunk at (" << position[0] << ", " << position[1] << ")" << endl;
       #endif
       for (currRowId=0; currRowId<chunkSize; currRowId++, position[0]++) {
         position[1] = 1;
         fin.read((char*)buf, readLen);
         if (fin.gcount() != readLen) {
           #ifdef DEBUG
-          log << "Roll back to the beginning of the file" << endl;
+            log << "Roll back to the beginning of the file" << endl;
+            rollback = true;
           #endif
           currRowId--;
           position[0]--;
@@ -131,19 +133,33 @@ public:
           fin.seekg(0, ios::beg);
           continue;
         }
+        #ifdef DEBUG
+          if (rollback) {
+            log << "Read data after rolling back to the beginning successfully" << endl;
+          }
+        #endif
         for (currColId=0; currColId<d; currColId++, position[1]++) {
-          // log << "Write " << buf[currColId] << " to (" << position[0] << ", " << position[1] << ")" << endl;
+          #ifdef DEBUG
+            if (rollback) {
+              log << "Write " << buf[currColId] << " to (" << position[0] << ", " << position[1] << ")" << endl;
+            }
+          #endif
           outputChunkIter->setPosition(position);
           valueToWrite.setDouble(buf[currColId]);
           outputChunkIter->writeItem(valueToWrite);
         }
+        #ifdef DEBUG
+          if (rollback) {
+            rollback = false;
+          }
+        #endif
       }
       outputChunkIter->flush();
     }
     #ifdef DEBUG
-    log << "Cleanning up..." << endl;
-    fin.close();
-    log.close();
+      log << "Cleanning up..." << endl;
+      fin.close();
+      log.close();
     #endif
     delete[] buf;
     return outputArray;
