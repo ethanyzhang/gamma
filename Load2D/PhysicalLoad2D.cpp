@@ -119,12 +119,12 @@ public:
       #ifdef DEBUG
         log << "Create chunk at (" << position[0] << ", " << position[1] << ")" << endl;
       #endif
-      for (currRowId=0; currRowId<chunkSize; currRowId++, position[0]++) {
+      for (currRowId=0; currRowId<chunkSize && position[0] <= n; currRowId++, position[0]++) {
         position[1] = 1;
         fin.read((char*)buf, readLen);
         if (fin.gcount() != readLen) {
           #ifdef DEBUG
-            log << "Roll back to the beginning of the file" << endl;
+            log << "Rolling back to the beginning of the file" << endl;
             rollback = true;
           #endif
           currRowId--;
