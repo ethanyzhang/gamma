@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Yiqun Zhang <zhangyiqun9164@gmail.com>
+ * Copyright (C) 2016 Yiqun Zhang <zhangyiqun9164@gmail.com>
  * All Rights Reserved.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -41,9 +41,26 @@ using namespace std;
 // Using C++ vector will be slow.
 namespace scidb {
 
-class PhysicalDiagSparseGamma : public PhysicalOperator {
-public:
+struct NLQ {
+  double N;
+  size_t d;
+  double L[D_MAX];
+  double Q[D_MAX];
+  NLQ() {
+    size_t i;
+    N = 0.0;
+    d = 0;
+    for(i=0; i<D_MAX; i++) {
+      L[i] = Q[i] = 0.0;
+    }
+  }
+};
 
+class PhysicalDiagSparseGamma : public PhysicalOperator {
+private:
+  NLQ nlq;
+
+public:
   PhysicalDiagSparseGamma(string const& logicalName,
                string const& physicalName,
                Parameters const& parameters,
@@ -51,18 +68,8 @@ public:
     PhysicalOperator(logicalName, physicalName, parameters, schema)
   { }
 
-  // The use of static arrays may improve the performance a little bit.
-  double L[D_MAX];
-  double Q[D_MAX];
 
-  void zeroArray() {
-    int i;
-    for(i=0; i<D_MAX; i++) {
-      L[i] = Q[i] = 0.0;
-    }
-  }
-
-  shared_ptr<Array> writeGamma(size_t n, size_t d, shared_ptr<Query> query) {
+  shared_ptr<Array> writeGamma(shared_ptr<Query> query) {
     // Output array and its iterator for all the chunks inside that array.
     shared_ptr<Array> outputArray(new MemArray(_schema, query));
     shared_ptr<ArrayIterator> outputArrayIter = outputArray->getIterator(0);
@@ -74,19 +81,19 @@ public:
     size_t i;
     Value valGamma;
 
-    valGamma.setDouble(n);
+    valGamma.setDouble(nlq.N);
     outputChunkIter->setPosition(position);
     outputChunkIter->writeItem(valGamma);
 
-    for(i=1; i<=d+1; i++) {
+    for(i=1; i<=nlq.d+1; i++) {
       position[0] = i+1;
-      valGamma.setDouble(L[i]);
+      valGamma.setDouble(nlq.L[i]);
       outputChunkIter->setPosition(position);
       outputChunkIter->writeItem(valGamma);
     }
-    for(i=1; i<=d+1; i++) {
-      position[0] = i+d+2;
-      valGamma.setDouble(Q[i]);
+    for(i=1; i<=nlq.d+1; i++) {
+      position[0] = i+nlq.d+2;
+      valGamma.setDouble(nlq.Q[i]);
       outputChunkIter->setPosition(position);
       outputChunkIter->writeItem(valGamma);
     }
@@ -105,12 +112,12 @@ public:
     size_t n = dimsN.getCurrLength();
     // Note: the input data set should have d+1 dimensions (including Y)
     size_t d = dimsD.getCurrLength() - 1;
-
+    nlq.N = n;
+    nlq.d = d;
     shared_ptr<ConstArrayIterator> inputArrayIter = inputArray->getConstIterator(0);
     Coordinates cellPosition;
 
     size_t i;
-    zeroArray();
     double value;
     while(! inputArrayIter->end() ) {
       shared_ptr<ConstChunkIterator> chunkIter = inputArrayIter->getChunk().getConstIterator();
@@ -119,8 +126,8 @@ public:
       while(! chunkIter->end() ) {
         cellPosition = chunkIter->getPosition();
         value = chunkIter->getItem().getDouble();
-        L[ cellPosition[1] ] += value;
-        Q[ cellPosition[1] ] += value * value;
+        nlq.L[ cellPosition[1] ] += value;
+        nlq.Q[ cellPosition[1] ] += value * value;
         ++(*chunkIter);
       }
       ++(*inputArrayIter);
@@ -136,11 +143,11 @@ public:
         shared_ptr <SharedBuffer> buf ( new MemoryBuffer(NULL, sizeof(double) * (d*2+2) ));
         double *Gammabuf = static_cast<double*> (buf->getData());
         for(i=1; i<=d+1; ++i) {
-          *Gammabuf = L[i];
+          *Gammabuf = nlq.L[i];
           ++Gammabuf;
         }
         for(i=1; i<=d+1; ++i) {
-          *Gammabuf = Q[i];
+          *Gammabuf = nlq.Q[i];
           ++Gammabuf;
         }
         BufSend(0, buf, query);
@@ -152,18 +159,18 @@ public:
           shared_ptr<SharedBuffer> buf = BufReceive(l, query);
           double *Gammabuf = static_cast<double*> (buf->getData());
           for(i=1; i<=d+1; ++i) {
-            L[i] += *Gammabuf;
+            nlq.L[i] += *Gammabuf;
             ++Gammabuf;
           }
           for(i=1; i<=d+1; ++i) {
-            Q[i] += *Gammabuf;
+            nlq.Q[i] += *Gammabuf;
             ++Gammabuf;
           }
         }
       }// end if getInstanceID() != 0
     }//end if InstancesCount() > 1
 
-    return writeGamma(n, d, query);
+    return writeGamma(query);
   }
 };
 
