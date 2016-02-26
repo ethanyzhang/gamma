@@ -35,6 +35,9 @@
 #include <query/Operator.h>
 #include <util/Network.h>
 #include <map>
+#include <fstream>
+#include <sstream>
+#include <cstdlib>
 #define D_MAX 2000
 
 using namespace std;
@@ -60,8 +63,9 @@ struct NLQ {
 class PhysicalGroupDiagDenseGamma : public PhysicalOperator {
 private:
   map<double, NLQ> nlq;
-  Coordinate k;
+  size_t k;
   size_t d;
+  ofstream log;
 
 public:
   PhysicalGroupDiagDenseGamma(string const& logicalName,
@@ -77,10 +81,10 @@ public:
     shared_ptr<ArrayIterator> outputArrayIter = outputArray->getIterator(0);
 
     shared_ptr<ChunkIterator> outputChunkIter;
-    Coordinates position(1, 1);
+    Coordinates position(2, 1);
     outputChunkIter = outputArrayIter->newChunk(position).getIterator(query, ChunkIterator::SEQUENTIAL_WRITE);
 
-    size_t i;
+    size_t i, j;
     Value valGamma;
 
     map<double, struct NLQ>::iterator it;
@@ -89,18 +93,27 @@ public:
       position[0] = i;
       position[1] = 1;
       valGamma.setDouble(it->second.N);
+      #ifdef DEBUG
+        log << "Entry for class " << i << ", n = " << it->second.N << endl;
+      #endif
       outputChunkIter->setPosition(position);
       outputChunkIter->writeItem(valGamma);
 
-      for(i=1; i<=d+1; i++) {
-        position[1] = i+1;
-        valGamma.setDouble(it->second.L[i]);
+      #ifdef DEBUG
+        log << "Writing L." << endl;
+      #endif
+      for(j=1; j<=d+1; j++) {
+        position[1] = j+1;
+        valGamma.setDouble(it->second.L[j]);
         outputChunkIter->setPosition(position);
         outputChunkIter->writeItem(valGamma);
       }
-      for(i=1; i<=d+1; i++) {
-        position[1] = i+d+2;
-        valGamma.setDouble(it->second.Q[i]);
+      #ifdef DEBUG
+        log << "Writing Q." << endl;
+      #endif
+      for(j=1; j<=d+1; j++) {
+        position[1] = j+d+2;
+        valGamma.setDouble(it->second.Q[j]);
         outputChunkIter->setPosition(position);
         outputChunkIter->writeItem(valGamma);
       }
@@ -114,7 +127,6 @@ public:
     shared_ptr<Array> outputArray(new MemArray(_schema, query));
     shared_ptr<Array> inputArray = inputArrays[0];
     ArrayDesc inputSchema = inputArray->getArrayDesc();
-
     // Get descriptor of two dimensions d and n.
     DimensionDesc dimsN = inputSchema.getDimensions()[0]; 
     DimensionDesc dimsD = inputSchema.getDimensions()[1];
@@ -127,9 +139,18 @@ public:
     size_t nChunkSize = dimsN.getChunkInterval();
     k = ((boost::shared_ptr<OperatorParamPhysicalExpression>&)_parameters[0])->getExpression()->evaluate().getInt64();
 
+    #ifdef DEBUG
+      stringstream ss;
+      ss << getenv("HOME") << "/groupdiagdensegamma-instance-" << query->getInstanceID() << ".log";
+      log.open(ss.str().c_str(), ios::out);
+      log << "n = " << n << endl << "d = " << d << endl << "k = " << k << endl;
+      log << "nStart = " << nStart << endl << "dStart = " << dStart << endl;
+      log << "nChunkSize = " << nChunkSize << endl;
+    #endif
+
     shared_ptr<ConstArrayIterator> inputArrayIter = inputArray->getConstIterator(0);
     Coordinates chunkPosition;
-    size_t i, j, m;
+    size_t i, j, k, m;
     double value;
     NLQ tmp;
     map<double, struct NLQ>::iterator it;
@@ -137,12 +158,21 @@ public:
     while(! inputArrayIter->end() ) {
       shared_ptr<ConstChunkIterator> chunkIter = inputArrayIter->getChunk().getConstIterator();
       chunkPosition = inputArrayIter->getPosition();
+      #ifdef DEBUG
+        log << "Getting into chunk (" << chunkPosition[0] << ", " << chunkPosition[1] << ")." << endl;
+      #endif
       for(i=chunkPosition[0]; i<chunkPosition[0] + nChunkSize; i++) {
         if(i == n + nStart) {
+          #ifdef DEBUG
+            log << "Reaching row " << i << ", exiting." << endl;
+          #endif
           break;
         }
         for(j=chunkPosition[1], m=1; j<=chunkPosition[1]+d; j++, m++) {
           if(j == d + 1 + dStart) {
+            #ifdef DEBUG
+              log << "Reaching column " << j << ", exiting." << endl;
+            #endif
             break;
           }
           value = chunkIter->getItem().getDouble();
@@ -153,15 +183,18 @@ public:
         double Y = tmp.L[d+1];
         it = nlq.find(Y);
         if (it == nlq.end()) {
+          #ifdef DEBUG
+            log << "Cannot find NLQ entry for class " << Y << ", creating new." << endl;
+          #endif
           nlq[Y].N = 1;
           nlq[Y].groupId = Y;
         }
         else {
           nlq[Y].N++;
         }
-        for (i=1; i<=d+1; i++) {
-          nlq[Y].L[i] += tmp.L[i];
-          nlq[Y].Q[i] += tmp.Q[i];
+        for (k=1; k<=d+1; k++) {
+          nlq[Y].L[k] += tmp.L[k];
+          nlq[Y].Q[k] += tmp.Q[k];
         }
       }
       ++(*inputArrayIter);
@@ -172,9 +205,15 @@ public:
      * COORDINATOR_INSTANCE if instance execute this query itself.
      */
     size_t localClassCount = nlq.size();
+    #ifdef DEBUG
+      log << "localClassCount = " << localClassCount << endl;
+    #endif
     if(query->getInstancesCount() > 1) {
       if(query->getInstanceID() != 0) {
-        // I am not the coordinator, I should send my Gamma matrix out.
+        // I am not the coordinator, I should send my NLQ out.
+        #ifdef DEBUG
+          log << "I am not the coordinator, I should send my NLQ out." << endl;
+        #endif
         shared_ptr <SharedBuffer> buf ( new MemoryBuffer(NULL, sizeof(struct NLQ) * localClassCount ));
         struct NLQ *NLQbuf = static_cast<struct NLQ*> (buf->getData());
         for(it = nlq.begin(); it != nlq.end(); it++) {
@@ -182,20 +221,35 @@ public:
           ++NLQbuf;
         }
         BufSend(0, buf, query);
+        #ifdef DEBUG
+          log << "Exiting." << endl;
+        #endif
         return outputArray;
       }
       else {
-        // I am the coordinator, I should collect Gamma matrix from workers.
+        // I am the coordinator, I should collect NLQ from workers.
+        #ifdef DEBUG
+          log << "I am the coordinator, I should collect NLQ from workers." << endl;
+        #endif
         for(InstanceID l = 1; l<query->getInstancesCount(); ++l) {
           shared_ptr<SharedBuffer> buf = BufReceive(l, query);
           if(! buf) {
+            #ifdef DEBUG
+              log << "Nothing from instance " << l << ", continue." << endl;
+            #endif
             continue;
           }
           size_t remoteClassCount = buf->getSize() / sizeof(struct NLQ);
           struct NLQ* NLQbuf = static_cast<struct NLQ*> (buf->getData());
+          #ifdef DEBUG
+            log << "Received " << remoteClassCount << " entries from instance " << l << endl;
+          #endif
           for(size_t i=0; i<remoteClassCount; ++i) {
             it = nlq.find(NLQbuf->groupId);
             if( it == nlq.end() ) {
+              #ifdef DEBUG
+                log << "Cannot find NLQ entry for class " << NLQbuf->groupId << ", creating new." << endl;
+              #endif
               nlq[NLQbuf->groupId] = *NLQbuf;
             }
             else {
@@ -207,7 +261,9 @@ public:
             }
             ++NLQbuf;
           }
-
+          #ifdef DEBUG
+            log << "Merge complete." << endl;
+          #endif
         }
       }// end if getInstanceID() != 0
     }//end if InstancesCount() > 1
