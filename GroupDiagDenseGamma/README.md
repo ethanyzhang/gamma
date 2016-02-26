@@ -11,7 +11,9 @@ Carlos Ordonez, Yiqun Zhang, Wellington Cabrera
 Please cite the paper above if you need to use this code in your research work.
 
 ###Usage:
-    GroupDiagDenseGamma(arrayName)
+    GroupDiagDenseGamma(arrayName, numOfClasses)
+
+The operator needs to know in advance the number of classes to determine the output array schema. The output array will give the diagonal elements of the Gamma matrix for each class sorted by the class ID in ascending order.
 
 ###Prerequisites:
 * The operator requires SciDB 15.7 or later.
