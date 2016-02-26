@@ -44,12 +44,22 @@ public:
     LogicalOperator(logicalName, alias) {
     ADD_PARAM_INPUT()
     ADD_PARAM_CONSTANT(TID_INT64) // Goup number k.
+    ADD_PARAM_VARIES() // Can specify the column ID of the Y.
+  }
+
+  vector< shared_ptr< OperatorParamPlaceholder>> nextVaryParamPlaceholder(const vector< ArrayDesc> &schemas) {
+    vector< shared_ptr< OperatorParamPlaceholder>> res;
+    res.push_back(END_OF_VARIES_PARAMS());
+    if (_parameters.size() == 1) {
+      res.push_back(PARAM_CONSTANT(TID_INT64));
+    }
+    return res;
   }
   
   ArrayDesc inferSchema(vector< ArrayDesc> schemas, shared_ptr< Query> query) {
     ArrayDesc const& inputSchema = schemas[0];
     Dimensions inputDims = inputSchema.getDimensions();
-    Coordinate k = evaluate(((boost::shared_ptr<OperatorParamLogicalExpression>&)_parameters[0])->getExpression(),
+    int64_t k = evaluate(((shared_ptr<OperatorParamLogicalExpression>&)_parameters[0])->getExpression(),
                             query, TID_INT64).getInt64();
 
     // The input array should have 2 dimensions: i and j.
@@ -77,7 +87,17 @@ public:
 
     DimensionDesc dimsD = inputDims[1];
     // We assume the input data set has d columns and an additional Y columns.
-    Coordinate d = dimsD.getCurrEnd() - dimsD.getCurrStart();
+    int64_t d = dimsD.getCurrEnd() - dimsD.getCurrStart();
+
+    if (_parameters.size() == 2) {
+      int64_t idY = evaluate(((shared_ptr< OperatorParamLogicalExpression>&)_parameters[1])->getExpression(),
+                                query, TID_INT64).getInt64();
+      if(idY < 1 || idY > d+1) {
+        throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_ILLEGAL_OPERATION)
+            << "Invalid value for the column ID of Y.";
+      }
+    }
+
     if(dimsD.getChunkInterval() < d+1) {
       throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_ILLEGAL_OPERATION)
           << "Chunk size of the column dimension must be no less than d+1.";

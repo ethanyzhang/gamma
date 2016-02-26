@@ -11,9 +11,11 @@ Carlos Ordonez, Yiqun Zhang, Wellington Cabrera
 Please cite the paper above if you need to use this code in your research work.
 
 ###Usage:
-    GroupDiagDenseGamma(arrayName, numOfClasses)
+    GroupDiagDenseGamma(arrayName, numOfClasses, [idY])
 
-The operator needs to know in advance the number of classes to determine the output array schema. The output array will give the diagonal elements of the Gamma matrix for each class sorted by the class ID in ascending order.
+**numOfClass:** The operator needs to know in advance the number of classes to determine the output array schema. The output array will give the diagonal elements of the Gamma matrix for each class sorted by the class ID in ascending order.
+
+**idY*[optional]*:** The column ID of *Y*. By default *Y* is the last column in the array. However, you can designate any column as Y by giving its column ID **(start from 1)** in this parameter. The designated column will be move to the last before computing the diagonal elements of the Gamma matrix for each class.
 
 ###Prerequisites:
 * The operator requires SciDB 15.7 or later.

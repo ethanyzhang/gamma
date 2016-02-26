@@ -63,8 +63,9 @@ struct NLQ {
 class PhysicalGroupDiagDenseGamma : public PhysicalOperator {
 private:
   map<double, NLQ> nlq;
-  size_t k;
-  size_t d;
+  int64_t k;
+  int64_t d;
+  int64_t idY;
   ofstream log;
 
 public:
@@ -84,7 +85,7 @@ public:
     Coordinates position(2, 1);
     outputChunkIter = outputArrayIter->newChunk(position).getIterator(query, ChunkIterator::SEQUENTIAL_WRITE);
 
-    size_t i, j;
+    int64_t i, j;
     Value valGamma;
 
     map<double, struct NLQ>::iterator it;
@@ -130,14 +131,18 @@ public:
     // Get descriptor of two dimensions d and n.
     DimensionDesc dimsN = inputSchema.getDimensions()[0]; 
     DimensionDesc dimsD = inputSchema.getDimensions()[1];
-    size_t n = dimsN.getCurrEnd() - dimsN.getCurrStart() + 1;
+    int64_t n = dimsN.getCurrEnd() - dimsN.getCurrStart() + 1;
     // Note: the input data set should have d+1 dimensions (including Y)
     d = dimsD.getCurrEnd() - dimsD.getCurrStart();
-    size_t nStart = dimsN.getCurrStart();
-    size_t dStart = dimsD.getCurrStart();
+    idY = d+1;
+    int64_t nStart = dimsN.getCurrStart();
+    int64_t dStart = dimsD.getCurrStart();
     // Get chunk size of n.
-    size_t nChunkSize = dimsN.getChunkInterval();
-    k = ((boost::shared_ptr<OperatorParamPhysicalExpression>&)_parameters[0])->getExpression()->evaluate().getInt64();
+    int64_t nChunkSize = dimsN.getChunkInterval();
+    k = ((shared_ptr<OperatorParamPhysicalExpression>&)_parameters[0])->getExpression()->evaluate().getInt64();
+    if (_parameters.size() == 2) {
+      idY = ((shared_ptr<OperatorParamPhysicalExpression>&)_parameters[1])->getExpression()->evaluate().getInt64();
+    }
 
     #ifdef DEBUG
       stringstream ss;
@@ -146,11 +151,12 @@ public:
       log << "n = " << n << endl << "d = " << d << endl << "k = " << k << endl;
       log << "nStart = " << nStart << endl << "dStart = " << dStart << endl;
       log << "nChunkSize = " << nChunkSize << endl;
+      log << "idY = " << idY << endl;
     #endif
 
     shared_ptr<ConstArrayIterator> inputArrayIter = inputArray->getConstIterator(0);
     Coordinates chunkPosition;
-    size_t i, j, k, m;
+    int64_t i, j, k, m, l;
     double value;
     NLQ tmp;
     map<double, struct NLQ>::iterator it;
@@ -180,7 +186,7 @@ public:
           tmp.Q[m] = value * value;
           ++(*chunkIter);
         }
-        double Y = tmp.L[d+1];
+        double Y = tmp.L[idY];
         it = nlq.find(Y);
         if (it == nlq.end()) {
           #ifdef DEBUG
@@ -192,10 +198,16 @@ public:
         else {
           nlq[Y].N++;
         }
-        for (k=1; k<=d+1; k++) {
-          nlq[Y].L[k] += tmp.L[k];
-          nlq[Y].Q[k] += tmp.Q[k];
+        for (k=1, l=1; k<=d+1; k++) {
+          if (k == idY) {
+            continue;
+          }
+          nlq[Y].L[l] += tmp.L[k];
+          nlq[Y].Q[l] += tmp.Q[k];
+          l++;
         }
+        nlq[Y].L[d+1] += tmp.L[idY];
+        nlq[Y].Q[d+1] += tmp.Q[idY];
       }
       ++(*inputArrayIter);
     }
@@ -239,12 +251,12 @@ public:
             #endif
             continue;
           }
-          size_t remoteClassCount = buf->getSize() / sizeof(struct NLQ);
+          int64_t remoteClassCount = buf->getSize() / sizeof(struct NLQ);
           struct NLQ* NLQbuf = static_cast<struct NLQ*> (buf->getData());
           #ifdef DEBUG
             log << "Received " << remoteClassCount << " entries from instance " << l << endl;
           #endif
-          for(size_t i=0; i<remoteClassCount; ++i) {
+          for(i=0; i<remoteClassCount; ++i) {
             it = nlq.find(NLQbuf->groupId);
             if( it == nlq.end() ) {
               #ifdef DEBUG
@@ -254,7 +266,7 @@ public:
             }
             else {
               it->second.N += NLQbuf->N;
-              for(size_t j=1; j<=d+1; ++j) {
+              for(j=1; j<=d+1; ++j) {
                 it->second.L[j] += NLQbuf->L[j];
                 it->second.Q[j] += NLQbuf->Q[j];
               }
