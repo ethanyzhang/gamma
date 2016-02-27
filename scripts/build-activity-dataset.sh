@@ -4,7 +4,7 @@
 rm -f subject.dat subject.binary.dat > /dev/null 2>&1
 for i in `seq 101 1 109`; do
   echo "Merging subject$i.dat"
-  cat subject$i.dat | sed -e "/\(^[^\s]*\s\)0\s\(.*\)/d" -e "s/NaN/0/g" -e "s/ /,/g" -e "s/\(^[^,]*,\)\([^,]*\),\(.*\)/\1\3,\2/g" >> subject.dat
+  cat subject$i.dat | sed -e "s/NaN/0/g" -e "/\(^[^\s]*\s\)0\s\(.*\)/d" -e "s/ /,/g" -e "s/\(^[^,]*,\)\([^,]*\),\(.*\)/\1\3,\2/g" >> subject.dat
 done
 classzero=(1 2 3 9 10 11 17 19)
 classone=(4 5 6 7 12 13 16 18 20 24)
