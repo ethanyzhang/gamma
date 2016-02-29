@@ -26,3 +26,6 @@
 *.exe
 *.out
 *.app
+
+converters/tab2vert
+converters/csv2binary

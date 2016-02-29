@@ -1,0 +1,15 @@
+#!/bin/bash
+utilities=("csv2binary")
+for u in ${utilities[@]}; do
+  path=`which $u`
+  if [ $? -eq 0 ] && [ ${path:0:1} != "." ]; then
+    echo -e "Command $u is linked to $path, \E[0;32mskip.\E[0m"
+  elif ! [ -x $u ]; then
+    echo -e "Cannot find executable file $u, \E[0;32mskip.\E[0m"
+  else
+    cmd="ln -s $PWD/$u /usr/local/bin/$u"
+    echo $cmd
+    sudo $cmd
+  fi
+done;
+

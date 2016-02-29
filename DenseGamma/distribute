@@ -36,6 +36,6 @@ if ! [ -f lib$opname.so ]; then
   exit
 fi
 for id in `seq 1 1 $1`; do
-  host=`printf "scidb%03d" $id`
+  host=`printf "node%d" $id`
   scp lib$opname.so scidb@$host:/opt/scidb/$SCIDB_VER/lib/scidb/plugins/
 done
