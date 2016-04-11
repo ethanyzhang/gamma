@@ -68,7 +68,7 @@ public:
     int64_t chunkSize = n < CHUNK_SIZE ? n : CHUNK_SIZE;
     double *buf = new double[d];
     int64_t totalChunks = (n-1) / chunkSize + 1;
-    int64_t chunksPerInstance = totalChunks / query->getInstancesCount();
+    int64_t chunksPerInstance = (totalChunks-1) / query->getInstancesCount() + 1;
     int64_t myStartChunkId = query->getInstanceID() * chunksPerInstance;
     int64_t myEndChunkId = myStartChunkId + chunksPerInstance - 1;
     int64_t currChunkId, currRowId, currColId;
@@ -92,7 +92,7 @@ public:
       log << "myEndChunkId = " << myEndChunkId << endl;
     #endif
 
-    if (myEndChunkId < myStartChunkId) {
+    if (myStartChunkId >= totalChunks) {
       #ifdef DEBUG
         log << "Nothing to be done on this instance, return." << endl;
         fin.close();
