@@ -1,5 +1,5 @@
 #!/bin/bash
-utilities=("rs" "scidbtime" "gensparse" "short")
+utilities=("rs" "scidbtime" "gensparse" "short" "dim")
 for u in ${utilities[@]}; do
   path=`which $u`
   if [ $? -eq 0 ] && [ ${path:0:1} != "." ]; then
