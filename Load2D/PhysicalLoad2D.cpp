@@ -158,9 +158,9 @@ public:
     }
     #ifdef DEBUG
       log << "Cleanning up..." << endl;
-      fin.close();
       log.close();
     #endif
+    fin.close();
     delete[] buf;
     return outputArray;
   }
