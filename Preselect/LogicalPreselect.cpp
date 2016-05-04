@@ -51,28 +51,28 @@ public:
     Dimensions corrDims = corrSchema.getDimensions();
     // The original input array should have 2 dimensions: i and j.
     if(originalDims.size() != 2) {
-      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_ILLEGAL_OPERATION)
+      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_INVALID_FUNCTION_ARGUMENT)
           << "Operator Preselect accepts an original array with exactly 2 dimensions.";
     }
     fprintf(logFile, "original has %ld dimensions, corr has %ld dimensions\n", originalDims.size(), corrDims.size());
     fflush(logFile);
     // The correlation input array should have 1 dimensions: i.
     if(corrDims.size() != 1) {
-      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_ILLEGAL_OPERATION)
+      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_INVALID_FUNCTION_ARGUMENT)
           << "Operator Preselect accepts a correlation array with exactly 1 dimension.";
     }
 
     // The original input array should have only 1 attribute, and it should be in double type.
     if (originalSchema.getAttributes(true).size() != 1 ||
       originalSchema.getAttributes(true)[0].getType() != TID_DOUBLE) {
-      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_ILLEGAL_OPERATION)
+      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_INVALID_FUNCTION_ARGUMENT)
           << "Operator Preselect accepts an original array with one attribute of type double";
     }
 
     // The correlation input array should have only 1 attribute, and it should be in double type.
     if (corrSchema.getAttributes(true).size() != 1 ||
       corrSchema.getAttributes(true)[0].getType() != TID_DOUBLE) {
-      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_ILLEGAL_OPERATION)
+      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_INVALID_FUNCTION_ARGUMENT)
           << "Operator Preselect accepts a correlation array with one attribute of type double";
     }
 
@@ -93,17 +93,17 @@ public:
       fprintf(logFile, "p_original = %ld, p_corr = %ld\n", p_original, p_corr);
       fflush(logFile);
       fclose(logFile);
-      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_ILLEGAL_OPERATION)
+      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_INVALID_FUNCTION_ARGUMENT)
           << "p in original array and correlation array don't match.";
     }
 
     if(originalDimsP.getChunkInterval() < p_original+1) {
-      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_ILLEGAL_OPERATION)
+      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_INVALID_FUNCTION_ARGUMENT)
           << "Chunk size of the column dimension in original input array must be no less than p+1.";
     }
 
     if(corrDimsP.getChunkInterval() < p_corr) {
-      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_ILLEGAL_OPERATION)
+      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_INVALID_FUNCTION_ARGUMENT)
           << "Chunk size of the column dimension in correlation input array must be no less than p+1.";
     }
 

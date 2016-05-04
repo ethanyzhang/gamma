@@ -51,14 +51,14 @@ public:
     
     // The input array should have 2 dimensions: i and j.
     if(inputDims.size() != 2) {
-      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_ILLEGAL_OPERATION)
+      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_INVALID_FUNCTION_ARGUMENT)
           << "Operator Gamma accepts an array with exactly 2 dimensions.";
     }
     
     // The input array should have only 1 attribute, and it should be in double type.
     if (inputSchema.getAttributes(true).size() != 1 ||
       inputSchema.getAttributes(true)[0].getType() != TID_DOUBLE) {
-      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_ILLEGAL_OPERATION)
+      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_INVALID_FUNCTION_ARGUMENT)
           << "Operator Gamma accepts an array with one attribute of type double";
     }
     
@@ -72,7 +72,7 @@ public:
     Coordinate d = dimsD.getCurrEnd() - dimsD.getCurrStart();
     
     if(dimsD.getChunkInterval() < d+1) {
-      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_ILLEGAL_OPERATION)
+      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_INVALID_FUNCTION_ARGUMENT)
           << "Chunk size of the column dimension must be no less than d+1.";
     }
     

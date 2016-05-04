@@ -64,19 +64,19 @@ public:
 
     // The input array should have 2 dimensions: i and j.
     if(inputDims.size() != 2) {
-      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_ILLEGAL_OPERATION)
+      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_INVALID_FUNCTION_ARGUMENT)
           << "Operator DiagDenseGamma accepts an array with exactly 2 dimensions.";
     }
 
     // The input array should have only 1 attribute, and it should be in double type.
     if (inputSchema.getAttributes(true).size() != 1 ||
       inputSchema.getAttributes(true)[0].getType() != TID_DOUBLE) {
-      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_ILLEGAL_OPERATION)
+      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_INVALID_FUNCTION_ARGUMENT)
           << "Operator DiagDenseGamma accepts an array with one attribute of type double";
     }
 
     if(k < 1) {
-      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_ILLEGAL_OPERATION)
+      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_INVALID_FUNCTION_ARGUMENT)
           << "Number of groups has to be greater or equal to 1.";
     }
 
@@ -93,13 +93,13 @@ public:
       int64_t idY = evaluate(((shared_ptr< OperatorParamLogicalExpression>&)_parameters[1])->getExpression(),
                                 query, TID_INT64).getInt64();
       if(idY < 1 || idY > d+1) {
-        throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_ILLEGAL_OPERATION)
+        throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_INVALID_FUNCTION_ARGUMENT)
             << "Invalid value for the column ID of Y.";
       }
     }
 
     if(dimsD.getChunkInterval() < d+1) {
-      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_ILLEGAL_OPERATION)
+      throw SYSTEM_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_INVALID_FUNCTION_ARGUMENT)
           << "Chunk size of the column dimension must be no less than d+1.";
     }
     DimensionDesc i("i", 1, k, k, 0); // Class
