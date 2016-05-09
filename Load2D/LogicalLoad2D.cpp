@@ -38,15 +38,31 @@ public:
     ADD_PARAM_CONSTANT(TID_STRING)
     ADD_PARAM_CONSTANT(TID_INT64)
     ADD_PARAM_CONSTANT(TID_INT64)
+    ADD_PARAM_VARIES()    // index start
   }
 
-  ArrayDesc inferSchema(vector< ArrayDesc> schemas, shared_ptr< Query> query) {
-    string fname = evaluate(((shared_ptr< OperatorParamLogicalExpression>&)_parameters[0])->getExpression(),
+  vector<shared_ptr<OperatorParamPlaceholder>> nextVaryParamPlaceholder(const vector<ArrayDesc> &schemas) {
+    // The user could choose to give config string.
+    vector<shared_ptr<OperatorParamPlaceholder>> res;
+    res.push_back(END_OF_VARIES_PARAMS());
+    if (_parameters.size() == 3) {
+      res.push_back(PARAM_CONSTANT(TID_INT64));
+    }
+    return res;
+  }
+
+  ArrayDesc inferSchema(vector<ArrayDesc> schemas, shared_ptr< Query> query) {
+    string fname = evaluate(((shared_ptr<OperatorParamLogicalExpression>&)_parameters[0])->getExpression(),
                         query, TID_STRING).getString();
-    int64_t n = evaluate(((shared_ptr< OperatorParamLogicalExpression>&)_parameters[1])->getExpression(),
+    int64_t n = evaluate(((shared_ptr<OperatorParamLogicalExpression>&)_parameters[1])->getExpression(),
                         query, TID_INT64).getInt64();
-    int64_t d = evaluate(((shared_ptr< OperatorParamLogicalExpression>&)_parameters[2])->getExpression(),
+    int64_t d = evaluate(((shared_ptr<OperatorParamLogicalExpression>&)_parameters[2])->getExpression(),
                         query, TID_INT64).getInt64();
+    int64_t indexStart = 1;
+    if (_parameters.size() == 4) {
+      indexStart = evaluate(((shared_ptr<OperatorParamLogicalExpression>&)_parameters[3])->getExpression(),
+                        query, TID_INT64).getInt64();
+    }
 
     ifstream fin;
     fin.open(fname.c_str(), ios::in);
@@ -60,14 +76,19 @@ public:
                                << "n and d have to be greater or equal to 1.";
     }
 
+    if (indexStart < 0) {
+      throw USER_EXCEPTION(SCIDB_SE_OPERATOR, SCIDB_LE_INVALID_FUNCTION_ARGUMENT)
+                               << "indexStart has to be greater or equal to 0.";
+    }
+
     Attributes outputAttributes;
     outputAttributes.push_back( AttributeDesc(0, "val", TID_DOUBLE, 0, 0) );
     outputAttributes = addEmptyTagAttribute(outputAttributes);
 
     Dimensions outputDims;
     int64_t chunkSize = n < CHUNK_SIZE ? n : CHUNK_SIZE;
-    outputDims.push_back( DimensionDesc("i", 1, n, chunkSize, 0) ); 
-    outputDims.push_back( DimensionDesc("j", 1, d, d, 0) ); 
+    outputDims.push_back( DimensionDesc("i", indexStart, n+indexStart-1, chunkSize, 0) ); 
+    outputDims.push_back( DimensionDesc("j", indexStart, d+indexStart-1, d, 0) ); 
     return ArrayDesc("Load2DdArray", outputAttributes, outputDims, defaultPartitioning());
   }
 };

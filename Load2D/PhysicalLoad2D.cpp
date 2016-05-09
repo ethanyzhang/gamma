@@ -65,6 +65,10 @@ public:
     string fname = ((shared_ptr< OperatorParamPhysicalExpression>&)_parameters[0])->getExpression()->evaluate().getString();
     int64_t n = ((shared_ptr< OperatorParamPhysicalExpression>&)_parameters[1])->getExpression()->evaluate().getInt64();
     int64_t d = ((shared_ptr< OperatorParamPhysicalExpression>&)_parameters[2])->getExpression()->evaluate().getInt64();
+    int64_t indexStart = 1;
+    if (_parameters.size() == 4) {
+      indexStart = ((shared_ptr< OperatorParamPhysicalExpression>&)_parameters[3])->getExpression()->evaluate().getInt64();
+    }
     int64_t chunkSize = n < CHUNK_SIZE ? n : CHUNK_SIZE;
     double *buf = new double[d];
     int64_t totalChunks = (n-1) / chunkSize + 1;
@@ -84,6 +88,7 @@ public:
       log.open(ss.str().c_str(), ios::out);
       log << "File name is " << fname << endl;
       log << "n = " << n << endl << "d = " << d << endl;
+      log << "indexStart = " << indexStart << endl;
       log << "totalChunks = " << totalChunks << endl;
       log << "chunksPerInstance = " << chunksPerInstance << endl;
       log << "I am instance " << query->getInstanceID() << ", there are "
@@ -113,14 +118,14 @@ public:
       bool rollback = false;
     #endif
     for (currChunkId=myStartChunkId; currChunkId<=myEndChunkId; currChunkId++) {
-      position[0] = currChunkId * chunkSize + 1;
-      position[1] = 1;
+      position[0] = currChunkId * chunkSize + indexStart;
+      position[1] = indexStart;
       outputChunkIter = outputArrayIter->newChunk(position).getIterator(query, ChunkIterator::SEQUENTIAL_WRITE);
       #ifdef DEBUG
         log << "Create chunk at (" << position[0] << ", " << position[1] << ")" << endl;
       #endif
-      for (currRowId=0; currRowId<chunkSize && position[0] <= n; currRowId++, position[0]++) {
-        position[1] = 1;
+      for (currRowId=0; currRowId<chunkSize && position[0] < n+indexStart; currRowId++, position[0]++) {
+        position[1] = indexStart;
         fin.read((char*)buf, readLen);
         if (fin.gcount() != readLen) {
           #ifdef DEBUG
