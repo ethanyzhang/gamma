@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (C) 2015 Yiqun Zhang <zhangyiqun9164@gmail.com>
+# Copyright (C) 2016 Yiqun Zhang <zhangyiqun9164@gmail.com>
 # All Rights Reserved.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -22,12 +22,13 @@ if [ $# -ne 1 ]; then
   exit
 fi
 
+user="ubuntu"
 ip=`hostname --ip-address`
 echo "The IP address of this server is $ip."
 former=`echo $ip | sed "s/\(^.*\.\).*$/\1/g"`
 latter=`echo $ip | sed "s/^.*\.\(.*$\)/\1/g"`
 for i in `seq 1 1 $1`; do
-  printf "%s%d scidb%03d\n" $former `expr $latter + $i - 1` $i | sudo tee -a /etc/hosts
+  printf "%s%d node%d\n" $former `expr $latter + $i - 1` $i | sudo tee -a /etc/hosts
 done
 sudo vim /etc/hosts
 
@@ -37,25 +38,25 @@ echo -e "\t* Enable ssh connection for root user."
 echo -e "\t* Distribute the new hosts file.\E[0m"
 hostlist=""
 for id in `seq 1 1 $1`; do
-  host=`printf "scidb%03d" $id`
+  host=`printf "node%d" $id`
   hostlist="$hostlist $host"
-  ssh -o StrictHostKeyChecking=no scidb@$host "sudo cp ~/.ssh/authorized_keys /root/.ssh/authorized_keys" > /dev/null 2>&1 &
-  ssh -o StrictHostKeyChecking=no scidb@$host "sudo scp -o StrictHostKeyChecking=no scidb@${ip}:/etc/hosts /etc/hosts" > /dev/null 2>&1 &
+  ssh -o StrictHostKeyChecking=no $user@$host "sudo cp ~/.ssh/authorized_keys /root/.ssh/authorized_keys" > /dev/null 2>&1 &
+  ssh -o StrictHostKeyChecking=no $user@$host "sudo scp -o StrictHostKeyChecking=no $user@${ip}:/etc/hosts /etc/hosts" > /dev/null 2>&1 &
 done
 for job in `jobs -p`; do
     wait $job
 done
 
 echo -e "\E[0;32mPreparing SciDB server...\E[0m"
-echo "scidb" | $SCIDB_SOURCE_PATH/deployment/deploy.sh scidb_prepare scidb "" $dbname $dbname $dbname /home/scidb/scidbdata/$dbname 2 default 1 $hostlist
+echo "scidb" | $SCIDB_SOURCE_PATH/deployment/deploy.sh scidb_prepare $user "" $dbname $dbname $dbname /home/$user/scidbdata/$dbname 2 default 1 $hostlist
 scidb.py startall $dbname
 
 echo -e "\E[0;32mUpdating SciDB user defined operators.\E[0m"
-cd /home/scidb/gamma-scidb
+cd /home/$user/gamma-scidb
 git pull
 
 echo -e "\E[0;32mCompiling and installing SciDB user defined operators.\E[0m"
-dirs=("/home/scidb/gamma-scidb/Load2D" "/home/scidb/gamma-scidb/DenseGamma")
+dirs=("/home/$user/gamma-scidb/Load2D" "/home/$user/gamma-scidb/DenseGamma")
 for dir in ${dirs[@]}; do
   cd $dir
   make clean
