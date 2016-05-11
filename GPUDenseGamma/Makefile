@@ -20,7 +20,7 @@ ACCFLAGS = -std=c++11 -O3 -shared -acc -ta=tesla:nordc,cc30 -Minfo=accel -fPIC
 
 OP_NAME=GPUDenseGamma
 
-CFLAGS=-std=c++11 -pedantic -W -Wextra -Wall -Wno-unknown-pragmas -Wno-strict-aliasing -Wno-long-long -Wno-unused-parameter -Wno-variadic-macros -fPIC -D__STDC_FORMAT_MACROS -Wno-system-headers -isystem -O3 -g -DNDEBUG -ggdb3  -D__STDC_LIMIT_MACROS
+CFLAGS=-std=c++11 -pedantic -W -Wextra -Wall -Wno-strict-aliasing -Wno-long-long -Wno-unused-parameter -Wno-variadic-macros -fPIC -D__STDC_FORMAT_MACROS -Wno-system-headers -isystem -O3 -g -DNDEBUG -ggdb3  -D__STDC_LIMIT_MACROS
 INC=-I. -DPROJECT_ROOT="\"$(SCIDB_SOURCE_PATH)\"" -isystem"$(SCIDB_SOURCE_PATH)/include" -isystem"$(BOOST_LOCATION)"
 LIBS=-L"$(SCIDB_SOURCE_PATH)/lib" -shared -Wl,-soname,lib$(OP_NAME).so -L. -lm
 

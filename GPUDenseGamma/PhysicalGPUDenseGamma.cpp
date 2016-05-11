@@ -40,8 +40,8 @@
 using namespace std;
 
 void computeGamma(double *memChunk, double *Gamma, size_t d, size_t nChunkSize);
-void enterData(double *memChunk, double *Gamma, size_t d, size_t nChunkSize);
-void exitData(double *memChunk, double *Gamma, size_t d, size_t nChunkSize);
+void enterDataRegion(double *memChunk, double *Gamma, size_t d, size_t nChunkSize);
+void exitDataRegion(double *memChunk, double *Gamma, size_t d, size_t nChunkSize);
 
 namespace scidb {
 class PhysicalGPUDenseGamma : public PhysicalOperator {
@@ -66,7 +66,7 @@ public:
     initOperator(inputArray, query);
 
     shared_ptr<ConstArrayIterator> inputArrayIter = inputArray->getConstIterator(0);
-    enterData(memChunkStorage, GammaStorage, d, nChunkSize);
+    enterDataRegion(memChunkStorage, GammaStorage, d, nChunkSize);
     while ( ! inputArrayIter->end()) {
       shared_ptr<ConstChunkIterator> chunkIter = inputArrayIter->getChunk().getConstIterator();
       copyChunkToMemory(chunkIter);
@@ -76,7 +76,7 @@ public:
       computeGamma(memChunkStorage, GammaStorage, d, nChunkSize);
       ++(*inputArrayIter);
     }
-    exitData(memChunkStorage, GammaStorage, d, nChunkSize);
+    exitDataRegion(memChunkStorage, GammaStorage, d, nChunkSize);
     combineGamma(query);
     shared_ptr<Array> outputArray = writeGamma(query);
     destroy();
