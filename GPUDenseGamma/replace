@@ -1,0 +1,5 @@
+#/bin/bash
+make uninstall
+rs localdb
+make install
+iquery -at

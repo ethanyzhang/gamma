@@ -15,22 +15,37 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 BOOST_LOCATION=/opt/scidb/$(SCIDB_VER)/3rdparty/boost/include
+ACC = pgc++
+ACCFLAGS = -std=c++11 -O3 -shared -acc -ta=tesla:nordc,cc30 -Minfo=accel -fPIC
 
 OP_NAME=GPUDenseGamma
 
-CFLAGS=-std=c++11 -pedantic -W -Wextra -Wall -Wno-strict-aliasing -Wno-long-long -Wno-unused-parameter -Wno-variadic-macros -fPIC -D__STDC_FORMAT_MACROS -Wno-system-headers -isystem -O3 -g -DNDEBUG -ggdb3  -D__STDC_LIMIT_MACROS
+CFLAGS=-std=c++11 -pedantic -W -Wextra -Wall -Wno-unknown-pragmas -Wno-strict-aliasing -Wno-long-long -Wno-unused-parameter -Wno-variadic-macros -fPIC -D__STDC_FORMAT_MACROS -Wno-system-headers -isystem -O3 -g -DNDEBUG -ggdb3  -D__STDC_LIMIT_MACROS
 INC=-I. -DPROJECT_ROOT="\"$(SCIDB_SOURCE_PATH)\"" -isystem"$(SCIDB_SOURCE_PATH)/include" -isystem"$(BOOST_LOCATION)"
 LIBS=-L"$(SCIDB_SOURCE_PATH)/lib" -shared -Wl,-soname,lib$(OP_NAME).so -L. -lm
 
 all:
 	@if test -z "$(SCIDB_SOURCE_PATH)"; then echo "[ERROR] SCIDB_SOURCE_PATH is not set. Try:\n\n\tmake SCIDB_SOURCE_PATH=<PATH TO SCIDB TRUNK>\n"; exit 1; fi 
 
-	$(CXX) $(CFLAGS) $(INC) -o funcs.cpp.o -c funcs.cpp
+	$(ACC) $(ACCFLAGS) -o funcs.o -c funcs.cpp
 	$(CXX) $(CFLAGS) $(INC) -o Logical$(OP_NAME).cpp.o -c Logical$(OP_NAME).cpp
 	$(CXX) $(CFLAGS) $(INC) -o Physical$(OP_NAME).cpp.o -c Physical$(OP_NAME).cpp
 
+	$(ACC) $(ACCFLAGS) -o lib$(OP_NAME).so \
+                        funcs.o \
+                        Logical$(OP_NAME).cpp.o \
+                        Physical$(OP_NAME).cpp.o \
+                        $(LIBS)
+
+nogpu:
+	@if test -z "$(SCIDB_SOURCE_PATH)"; then echo "[ERROR] SCIDB_SOURCE_PATH is not set. Try:\n\n\tmake SCIDB_SOURCE_PATH=<PATH TO SCIDB TRUNK>\n"; exit 1; fi 
+
+	$(CXX) $(CFLAGS) $(INC) -DNOGPU -o funcs.o -c funcs.cpp
+	$(CXX) $(CFLAGS) $(INC) -o Logical$(OP_NAME).cpp.o -c Logical$(OP_NAME).cpp
+	$(CXX) $(CFLAGS) $(INC) -DNOGPU -o Physical$(OP_NAME).cpp.o -c Physical$(OP_NAME).cpp
+
 	$(CXX) $(CFLAGS) $(INC) -o lib$(OP_NAME).so \
-                             funcs.cpp.o \
+                             funcs.o \
                              Logical$(OP_NAME).cpp.o \
                              Physical$(OP_NAME).cpp.o \
                              $(LIBS)

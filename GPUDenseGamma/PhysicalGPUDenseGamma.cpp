@@ -39,7 +39,7 @@
 #include <string>
 using namespace std;
 
-void computeGamma(double **memChunk, double **Gamma, size_t d, size_t nChunkSize);
+void computeGamma(double *memChunk, double *Gamma, size_t d, size_t nChunkSize);
 
 namespace scidb {
 class PhysicalGPUDenseGamma : public PhysicalOperator {
@@ -67,7 +67,10 @@ public:
     while ( ! inputArrayIter->end()) {
       shared_ptr<ConstChunkIterator> chunkIter = inputArrayIter->getChunk().getConstIterator();
       copyChunkToMemory(chunkIter);
-      computeGamma(memChunk, Gamma, d, nChunkSize);
+      #ifdef DEBUG
+      log << "computeGamma for new chunk" << endl;
+      #endif
+      computeGamma(memChunkStorage, GammaStorage, d, nChunkSize);
       ++(*inputArrayIter);
     }
     combineGamma(query);
@@ -81,7 +84,7 @@ public:
     Coordinates currPos;
     while ( ! chunkIter->end()) {
       currPos = chunkIter->getPosition();
-      memChunk[currPos[0]-chunkPos[0]][currPos[1]-chunkPos[1]+1] = chunkIter->getItem().getDouble();
+      memChunk[currPos[1]-chunkPos[1]+1][currPos[0]-chunkPos[0]] = chunkIter->getItem().getDouble();
       ++(*chunkIter);
     }
   }
@@ -142,7 +145,8 @@ public:
     DimensionDesc dimsD = inputSchema.getDimensions()[1];
     d = dimsD.getCurrEnd() - dimsD.getCurrStart() + 2;  // Output is (d+1)x(d+1)
     nChunkSize = dimsN.getChunkInterval();
-    GammaLen = (d+1)*d/2;
+    // GammaLen = (d+1)*d/2;
+    GammaLen = d*d;
     #ifdef DEBUG
     // Create or open the log file.
     stringstream ss;
@@ -151,18 +155,19 @@ public:
     log << "d = " << d << " nChunkSize = " << nChunkSize << " GammaLen = " << GammaLen << endl;
     #endif
 
-    memChunkStorage = new double[nChunkSize*d];
+    memChunkStorage = new double[d*nChunkSize];
     GammaStorage = new double[GammaLen];
-    memChunk = new double*[nChunkSize];
+    memChunk = new double*[d];
     Gamma = new double*[d];
-    memset(memChunkStorage, 0, sizeof(double)*nChunkSize*d);
+    memset(memChunkStorage, 0, sizeof(double)*d*nChunkSize);
     memset(GammaStorage, 0, sizeof(double)*GammaLen);
-    for (size_t i=0; i<nChunkSize; i++) {
-      memChunk[i] = &memChunkStorage[i*d];
-      memChunk[i][0] = 1.0;
-    }
     for (size_t i=0; i<d; i++) {
-      Gamma[i] = &GammaStorage[(i+1)*i/2];
+      memChunk[i] = &memChunkStorage[i*nChunkSize];
+      // Gamma[i] = &GammaStorage[(i+1)*i/2];
+      Gamma[i] = &GammaStorage[i*d];
+    }
+    for (size_t i=0; i<nChunkSize; i++) {
+      memChunk[0][i] = 1.0;
     }
   }
 
