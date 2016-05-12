@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ $# -ne 2 ]; then
+  echo "Usage: repeat [AFL] [repeat times]"
+  exit
+fi
+for i in `seq 1 1 $2`; do
+  iquery -atq "$1" | grep "time:" | cut -d' ' -f4 | sed "s/ms//g"
+done
