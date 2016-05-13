@@ -11,3 +11,6 @@ store(load2d('/home/ubuntu/x.bin',10000000, 20), x10m);
 store(load2d('/home/ubuntu/x.bin',10000000, 40), y10m);
 store(load2d('/home/ubuntu/x.bin',10000000, 60), z10m);
 store(load2d('/home/ubuntu/x.bin',10000000, 80), w10m);
+store(load2d('/home/ubuntu/x.bin',1000000, 100), v1m);
+store(load2d('/home/ubuntu/x.bin',10000000, 100), v10m);
+
