@@ -20,7 +20,6 @@ int main(int argc, char *argv[]) {
   stringstream outputBuffer;
   int currLine = -1;
   int col, intValue;
-  double doubleValue;
 
   fin.open(argv[1], ios::in);
   if (! fin.is_open()) {
@@ -45,7 +44,6 @@ int main(int argc, char *argv[]) {
         }
         // ignore the second column.
         else if (col == 2) {
-          doubleValue = stod(inputBuffer.str());
           outputBuffer << inputBuffer.str() << ",";
         }
         col++;
