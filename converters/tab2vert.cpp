@@ -1,13 +1,12 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include <cstdint>
-#include <vector>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 using namespace std;
 
 void help() {
   cout << "Transform tabluar csv file to its vertical form." << endl;
-  cout << "Usage: tab2verti [file name]" << endl;
+  cout << "Usage: tab2vert [file name]" << endl;
   exit(0);
 }
 

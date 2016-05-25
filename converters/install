@@ -1,5 +1,5 @@
 #!/bin/bash
-utilities=("csv2binary")
+utilities=("csv2binary" "tab2vert" "vert2tab")
 for u in ${utilities[@]}; do
   path=`which $u`
   if [ $? -eq 0 ] && [ ${path:0:1} != "." ]; then
