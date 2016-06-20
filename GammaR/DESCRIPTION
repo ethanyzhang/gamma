@@ -1,0 +1,8 @@
+Package: GammaR
+Title: The GammaR package
+Version: 0.0.0.9000
+Authors@R: person("Yiqun", "Zhang", email = "zhangyiqun9164@gmail.com", role = c("aut", "cre"))
+Description: R package to call Gamma SciDB operator and compute models.
+Depends: R (>= 3.2.3)
+License: MIT
+LazyData: true

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Yiqun Zhang <zhangyiqun9164@gmail.com>
+ * Copyright (C) 2013-2016 Yiqun Zhang <zhangyiqun9164@gmail.com>
  * All Rights Reserved.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -42,7 +42,7 @@ public:
   { }
 
 
-  shared_ptr< Array > execute(vector< shared_ptr< Array> >& inputArrays, shared_ptr<Query> query) {
+  shared_ptr< Array > execute(vector< shared_ptr<Array>>& inputArrays, shared_ptr<Query> query) {
     // I maintain the log of the operator in a local file named after Correlation_N.log, N is the instance ID.
     stringstream logFileName;
     logFileName << "/home/scidb/correlation_" << query->getInstanceID() << ".log";
@@ -196,7 +196,6 @@ public:
     delete[] L;
     delete[] corr;
     return outputArray;
-
   }
 };
 

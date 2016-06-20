@@ -1,9 +1,0 @@
-create array KDDnet_n000010K_d000100<val:double> [i=1:10000,10000,0,j=1:100,100,0];
-create array KDDnet_n000100K_d000100<val:double> [i=1:100000,10000,0,j=1:100,100,0];
-create array KDDnet_n000001M_d000100<val:double> [i=1:1000000,10000,0,j=1:100,100,0];
-create array KDDnet_n000010M_d000100<val:double> [i=1:10000000,10000,0,j=1:100,100,0];
-
-load(KDDnet_n000001M_d000100, '/home/scidb/yzhang/1m.data', -2, 'opaque');
-load(KDDnet_n000010K_d000100, '/home/scidb/yzhang/10k.data', -2, 'opaque');
-load(KDDnet_n000100K_d000100, '/home/scidb/yzhang/100k.data', -2, 'opaque');
-load(KDDnet_n000010M_d000100, '/home/scidb/yzhang/10m.data', -2, 'opaque');

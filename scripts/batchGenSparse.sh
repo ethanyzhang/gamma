@@ -1,6 +1,5 @@
 #!/bin/bash
-
-# Copyright (C) 2015 Yiqun Zhang <zhangyiqun9164@gmail.com>
+# Copyright (C) 2013-2016 Yiqun Zhang <zhangyiqun9164@gmail.com>
 # All Rights Reserved.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -16,9 +15,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-echo "Loading 1M dataset..."
-scidbtime "store(load2d('/home/scidb/kdd.bin', 1000000, 39), kdd1m);"
-echo "Loading 10M dataset..."
-scidbtime "store(load2d('/home/scidb/kdd.bin', 10000000, 39), kdd10m);"
-echo "Loading 100M dataset..."
-scidbtime "store(load2d('/home/scidb/kdd.bin', 100000000, 39), kdd100m);"
+n=(10000000)
+d=(100 200 400 800)
+den=(0.001 0.01 0.1 1)
+for i in ${n[@]}; do
+  strn=`short $i`
+  for j in ${d[@]}; do
+    for k in ${den[@]}; do
+      strden=`echo "scale=0; $k*1000/1" | bc`
+      name=`printf "n%sd%03dden%04d" $strn $j $strden`
+      cmd="gensparse $name $i $j $k"
+      echo -e "\033[0;32m$cmd\033[0m"
+      $cmd
+    done
+  done
+done

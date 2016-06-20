@@ -1,4 +1,0 @@
-store(concat(KDDnet_n000010M_d000010_dense, KDDnet_n000010M_d000010_dense), KDDnet_n000020M_d000010_dense);
-store(concat(KDDnet_n000020M_d000010_dense, KDDnet_n000020M_d000010_dense), KDDnet_n000040M_d000010_dense);
-store(concat(KDDnet_n000040M_d000010_dense, KDDnet_n000040M_d000010_dense), KDDnet_n000080M_d000010_dense);
-store(concat(KDDnet_n000080M_d000010_dense, KDDnet_n000020M_d000010_dense), KDDnet_n000100M_d000010_dense);
