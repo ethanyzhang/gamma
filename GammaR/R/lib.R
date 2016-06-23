@@ -65,11 +65,12 @@ KMeans = function(dataset, k, imax = 50, incremental = TRUE, omega = 0.5) {
   query = paste("kmeans(", dataset, ", ", k, ", ", imax, ", 'incremental=", incremental, ",omega=", omega, "')", sep="")
   cat(query, "\n")
   kmodel=iquery(query, return=TRUE)
-  d=(dim(kmodel)[1]/k-1)/2
+  d=(dim(kmodel)[1]/k-2)/2
   W = matrix(0, nrow=k, ncol=1)
   C = matrix(0, nrow=k, ncol=d)
   R = matrix(0, nrow=k, ncol=d)
-    cur=1
+  averageDistance = 0
+  cur=1
   for (i in 1:k) {
     W[i] = kmodel[cur,3]
     cur=cur+1
@@ -81,6 +82,8 @@ KMeans = function(dataset, k, imax = 50, incremental = TRUE, omega = 0.5) {
       R[i,j] = kmodel[cur,3]
       cur=cur+1
     }
+    averageDistance = kmodel[cur,3]
+    cur=cur+1
   }
-  return(list(W=W,C=C,R=R))
+  return(list(W=W,C=C,R=R,avgDistance=averageDistance))
 }
