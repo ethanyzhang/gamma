@@ -63,7 +63,7 @@ PCA = function(Gamma) {
 
 KMeans = function(dataset, k, imax = 50, incremental = TRUE, omega = 0.5) {
   query = paste("kmeans(", dataset, ", ", k, ", ", imax, ", 'incremental=", incremental, ",omega=", omega, "')", sep="")
-  cat(query, "\n")
+  # cat(query, "\n")
   kmodel=iquery(query, return=TRUE)
   d=(dim(kmodel)[1]/k-2)/2
   W = matrix(0, nrow=k, ncol=1)
