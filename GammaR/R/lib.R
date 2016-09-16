@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Gamma = function(arrName) {
-  strquery = paste("DenseGamma(", arrName, ");", sep="")
+  strquery = paste("DenseGamma(", arrName, ")", sep="")
   Gamma_vertical = iquery(strquery, return=TRUE)
   d = max(Gamma_vertical$i)
   Gamma = matrix(0, nrow=d, ncol=d)
