@@ -36,6 +36,9 @@ all:
 debug: CFLAGS += -D DEBUG
 debug: all
 
+scidb16: CFLAGS += -D SCIDB16
+scidb16: all
+
 clean:
 	rm -f *.o *.so
 
