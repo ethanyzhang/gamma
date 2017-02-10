@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (C) 2013-2016 Yiqun Zhang <zhangyiqun9164@gmail.com>
+# Copyright (C) 2013-2017 Yiqun Zhang <zhangyiqun9164@gmail.com>
 # All Rights Reserved.
 #
 # This program is free software: you can redistribute it and/or modify
