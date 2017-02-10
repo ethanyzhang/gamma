@@ -28,6 +28,21 @@ Gamma = function(arrName) {
   return(Gamma)
 }
 
+IncrGamma = function(arrName) {
+  strquery = paste("show(", arrName, ")", sep="")
+  strquery = paste("IncrDenseGamma(", arrName, ")", sep="")
+  Gamma_vertical = iquery(strquery, return=TRUE)
+  d = max(Gamma_vertical$i)
+  Gamma = matrix(0, nrow=d, ncol=d)
+  k = 1
+  for (i in 1:d)
+  for (j in 1:d) {
+    Gamma[i,j] = Gamma_vertical[k,3]
+    k = k+1
+  }
+  return(Gamma)
+}
+
 LR = function(Gamma) {
   d = dim(Gamma)[1]-2
   L = Gamma[2:(d+1),1];

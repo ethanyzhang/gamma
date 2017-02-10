@@ -82,7 +82,16 @@ public:
     Dimensions outputDims;
     outputDims.push_back(i); 
     outputDims.push_back(j); 
-    return ArrayDesc("IncrDenseGamma_" + inputSchema.getName(), outputAttributes, outputDims, defaultPartitioning());
+#ifdef SCIDB16
+    return ArrayDesc("IncrDenseGamma_" + inputSchema.getName(),
+                     outputAttributes, outputDims,
+                     defaultPartitioning(),
+                     query->getDefaultArrayResidency());
+#else
+    return ArrayDesc("IncrDenseGamma_" + inputSchema.getName(),
+                     outputAttributes, outputDims,
+                     defaultPartitioning());
+#endif
   }
 };
 

@@ -16,7 +16,7 @@
 
 BOOST_LOCATION=/opt/scidb/$(SCIDB_VER)/3rdparty/boost/include
 
-OP_NAME=DenseGamma
+OP_NAME=IncrDenseGamma
 
 CFLAGS=-std=c++11 -pedantic -W -Wextra -Wall -Wno-strict-aliasing -Wno-long-long -Wno-unused-parameter -Wno-variadic-macros -fPIC -D__STDC_FORMAT_MACROS -Wno-system-headers -isystem -O3 -g -DNDEBUG -ggdb3  -D__STDC_LIMIT_MACROS
 INC=-I. -DPROJECT_ROOT="\"$(SCIDB_SOURCE_PATH)\"" -isystem"$(SCIDB_SOURCE_PATH)/include" -isystem"$(BOOST_LOCATION)"

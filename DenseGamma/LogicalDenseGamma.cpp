@@ -80,8 +80,17 @@ public:
     DimensionDesc j("j", 1, d+2, d+2, 0);
     Dimensions outputDims;
     outputDims.push_back(i); 
-    outputDims.push_back(j); 
-    return ArrayDesc("DenseGamma_" + inputSchema.getName(), outputAttributes, outputDims, defaultPartitioning());
+    outputDims.push_back(j);
+#ifdef SCIDB16
+    return ArrayDesc("DenseGamma_" + inputSchema.getName(),
+                     outputAttributes, outputDims,
+                     defaultPartitioning(),
+                     query->getDefaultArrayResidency());
+#else
+    return ArrayDesc("DenseGamma_" + inputSchema.getName(),
+                     outputAttributes, outputDims,
+                     defaultPartitioning());
+#endif
   }
 };
 
