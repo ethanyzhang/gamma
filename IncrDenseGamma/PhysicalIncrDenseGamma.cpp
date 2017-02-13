@@ -116,13 +116,13 @@ public:
     Coordinates chunkPosition;
 
     size_t i, j, k, m;
-    int64_t currChunkId = -1;
-    while (currChunkId != chunkSerialNumberToContinue) {
-      if (inputArrayIter->end()) {
-        return outputArray;
-      }
+    int64_t currChunkId = 0;
+    while (! inputArrayIter->end() && currChunkId != chunkSerialNumberToContinue) {
       currChunkId++;
       ++(*inputArrayIter);
+    }
+    if (inputArrayIter->end()) {
+      return outputArray;
     }
 
     // compute on one chunk
