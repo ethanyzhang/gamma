@@ -76,8 +76,17 @@ public:
       computeGamma(memChunkStorage, GammaStorage, d, nChunkSize);
       ++(*inputArrayIter);
     }
+    #ifdef DEBUG
+    log << "Computation finished." << endl;
+    #endif
     exitDataRegion(memChunkStorage, GammaStorage, d, nChunkSize);
+    #ifdef DEBUG
+    log << "exited data region" << endl;
+    #endif
     combineGamma(query);
+    #ifdef DEBUG
+    log << "Gamma combined." << endl;
+    #endif
     shared_ptr<Array> outputArray = writeGamma(query);
     destroy();
     return outputArray;
@@ -94,23 +103,25 @@ public:
   }
 
   void combineGamma(shared_ptr<Query> query) {
-    if(query->getInstancesCount() > 1) {
-      if(query->getInstanceID() != 0) {
-        // I am not the coordinator, I should send my Gamma matrix out.
-        shared_ptr<SharedBuffer> buf(new MemoryBuffer(GammaStorage, sizeof(double)*GammaLen, false));
-        BufSend(0, buf, query);
-      }
-      else {
-        // I am the coordinator, I should collect Gamma matrix from workers.
-        for(InstanceID l = 1; l<query->getInstancesCount(); ++l) {
+    if (query->isCoordinator()) {
+      for (InstanceID l = 1; l < query->getInstancesCount(); ++l) {
+        if (l != query->getInstanceID()) {
           shared_ptr<SharedBuffer> buf = BufReceive(l, query);
           double *Gammabuf = static_cast<double*> (buf->getData());
           for(size_t i=0; i<GammaLen; ++i) {
             GammaStorage[i] += Gammabuf[i];
           }
+          #ifdef DEBUG
+          log << "Received from instance " << l << endl;
+          #endif
         }
-      } // end if getInstanceID() != 0
-    } //end if InstancesCount() > 1
+      }
+    }
+    else {
+      // I am not the coordinator, I should send my Gamma matrix out.
+      shared_ptr<SharedBuffer> buf(new MemoryBuffer(GammaStorage, sizeof(double)*GammaLen, false));
+      BufSend(query->getCoordinatorID(), buf, query);
+    }
   }
 
   shared_ptr<Array> writeGamma(shared_ptr<Query> query) {
