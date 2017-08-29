@@ -6,9 +6,10 @@ Gamma = function(x) {
 }
 
 matrixD = 100
-matrixN = 10000000
+matrixN = 1000000
 fBin <- file("x-n010Md100.bin", "rb");
 x = readBin(fBin, numeric(), n=matrixN*matrixD, size=8)
 m = matrix(nrow=matrixN, byrow=TRUE, data=x)
-
-system.time(gamma <- Gamma(m))
+# system.time(gamma <- Gamma(m))
+# system.time(gamma <- princomp(m))
+system.time(gamma <- lm(m[,matrixD] ~ m[,1:matrixD-1]))
