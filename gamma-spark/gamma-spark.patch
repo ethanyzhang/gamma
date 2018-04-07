@@ -1,0 +1,45 @@
+From 85dace75ee620c66d59917d3a8117961a127583f Mon Sep 17 00:00:00 2001
+From: Yiqun Zhang <zhangyiqun9164@gmail.com>
+Date: Tue, 23 Feb 2016 15:50:28 -0600
+Subject: [PATCH] Expose callJMethod, callJStatic, newJObject
+
+---
+ R/pkg/NAMESPACE    |  4 ++++
+ R/pkg/R/generics.R | 12 ++++++++++++
+ 2 files changed, 16 insertions(+)
+
+diff --git a/R/pkg/NAMESPACE b/R/pkg/NAMESPACE
+index f194a46303..af7555fdae 100644
+--- a/R/pkg/NAMESPACE
++++ b/R/pkg/NAMESPACE
+@@ -296,3 +296,7 @@ export("structField",
+        "structType.jobj",
+        "structType.structField",
+        "print.structType")
++
++export("callJMethod",
++       "newJObject",
++       "callJStatic")
+diff --git a/R/pkg/R/generics.R b/R/pkg/R/generics.R
+index 2dba71abec..825aa546fa 100644
+--- a/R/pkg/R/generics.R
++++ b/R/pkg/R/generics.R
+@@ -1160,3 +1160,15 @@ setGeneric("predict", function(object, ...) { standardGeneric("predict") })
+ #' @rdname rbind
+ #' @export
+ setGeneric("rbind", signature = "...")
++
++#' @rdname callJMethod
++#' @export
++setGeneric("callJMethod", function(objId, methodName, ...) { standardGeneric("callJMethod")})
++ 
++#' @rdname newJobject
++#' @export
++setGeneric("newJObject", function(className, ...) {standardGeneric("newJObject")})
++
++#' @rdname callJStatic
++#' @export
++setGeneric("callJStatic", function(className, methodName, ...) {standardGeneric("callJStatic")})
+-- 
+2.15.1 (Apple Git-101)
+
