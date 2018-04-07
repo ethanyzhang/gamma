@@ -1,0 +1,31 @@
+INSERT INTO XV
+    SELECT i, 1, X1 FROM n001Md08k04
+    WHERE incr_step = 1;
+
+INSERT INTO XV
+    SELECT i, 2, X2 FROM n001Md08k04
+    WHERE incr_step = 1;
+
+INSERT INTO XV
+    SELECT i, 3, X3 FROM n001Md08k04
+    WHERE incr_step = 1;
+
+INSERT INTO XV
+    SELECT i, 4, X4 FROM n001Md08k04
+    WHERE incr_step = 1;
+
+INSERT INTO XV
+    SELECT i, 5, X5 FROM n001Md08k04
+    WHERE incr_step = 1;
+
+INSERT INTO XV
+    SELECT i, 6, X6 FROM n001Md08k04
+    WHERE incr_step = 1;
+
+INSERT INTO XV
+    SELECT i, 7, X7 FROM n001Md08k04
+    WHERE incr_step = 1;
+
+INSERT INTO XV
+    SELECT i, 8, X8 FROM n001Md08k04
+    WHERE incr_step = 1;
