@@ -1,0 +1,33 @@
+https://www.ecofinancialtechnology.com/2014/07/build-a-gpu-development-environment-hosted-on-aws/
+http://tleyden.github.io/blog/2014/10/25/cuda-6-dot-5-on-aws-gpu-instance-running-ubuntu-14-dot-04/
+
+sudo -s
+apt-get update
+apt-get install -y build-essential gcc g++ make binutils linux-headers-`uname -r`
+wget http://us.download.nvidia.com/XFree86/Linux-x86_64/340.46/NVIDIA-Linux-x86_64-340.46.run
+chmod +x NVIDIA-Linux-x86_64-340.46.run
+
+sudo apt-get install linux-image-extra-virtual
+sudo vim /etc/modprobe.d/blacklist-nouveau.conf
+blacklist nouveau
+blacklist lbm-nouveau
+options nouveau modeset=0
+alias nouveau off
+alias lbm-nouveau off
+echo options nouveau modeset=0 | sudo tee -a /etc/modprobe.d/nouveau-kms.conf
+sudo update-grub
+sudo apt-get install linux-source
+sudo apt-get install linux-headers-`uname -r`
+
+sudo vim /etc/modprobe.d/blacklist.conf
+blacklist vga16fb
+blacklist nouveau
+blacklist rivafb
+blacklist nvidiafb
+blacklist rivatv
+sudo update-initramfs -u
+sudo reboot
+
+sudo ./NVIDIA-Linux-x86_64-340.46.run
+
+nvidia-smi -q
