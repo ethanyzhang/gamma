@@ -10,14 +10,14 @@ Carlos Ordonez, Yiqun Zhang, Wellington Cabrera
 
 Please cite the paper above if you need to use this code in your research work.
 
-###Usage:
+### Usage:
     DenseGamma(arrayName)
 
-###Prerequisites:
+### Prerequisites:
 * The operator requires SciDB 15.7 or later.
 * Environment variables ``SCIDB_SOURCE_PATH`` and ``SCIDB_VER`` need to be properly set.
 
-###Compile and install:
+### Compile and install:
 
     make && make install
 Your SciDB server needs to be up when you run the install command.

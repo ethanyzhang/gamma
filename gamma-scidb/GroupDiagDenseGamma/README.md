@@ -10,18 +10,18 @@ Carlos Ordonez, Yiqun Zhang, Wellington Cabrera
 
 Please cite the paper above if you need to use this code in your research work.
 
-###Usage:
+### Usage:
     GroupDiagDenseGamma(arrayName, numOfClasses, [idY])
 
 **numOfClass:** The operator needs to know in advance the number of classes to determine the output array schema. The output array will give the diagonal elements of the Gamma matrix for each class sorted by the class ID in ascending order.
 
 **idY*[optional]*:** The column ID of *Y*. By default *Y* is the last column in the array. However, you can designate any column as Y by giving its column ID **(start from 1)** in this parameter. The designated column will be move to the last before computing the diagonal elements of the Gamma matrix for each class.
 
-###Prerequisites:
+### Prerequisites:
 * The operator requires SciDB 15.7 or later.
 * Environment variables ``SCIDB_SOURCE_PATH`` and ``SCIDB_VER`` need to be properly set.
 
-###Compile and install:
+### Compile and install:
 
     make && make install
 Your SciDB server needs to be up when you run the install command.
