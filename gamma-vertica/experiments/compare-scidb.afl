@@ -1,0 +1,27 @@
+store(load2d('/home/scidb/dataset/KDDn001Md80.bin',1000000,80),kdd001md080);
+store(filter(kdd001md080, j<=40), kdd001md040);
+store(filter(kdd001md040, j<=20), kdd001md020);
+store(filter(kdd001md020, j<=10), kdd001md010);
+
+store(load2d('/home/scidb/dataset/KDDn001Md80.bin',100000,80),kdd100kd080);
+store(filter(kdd100kd080, j<=40), kdd100kd040);
+store(filter(kdd100kd040, j<=20), kdd100kd020);
+store(filter(kdd100kd020, j<=10), kdd100kd010);
+
+store(load2d('/home/scidb/dataset/KDDn001Md80.bin',10000,80),kdd010kd080);
+store(filter(kdd010kd080, j<=40), kdd010kd040);
+store(filter(kdd010kd040, j<=20), kdd010kd020);
+store(filter(kdd010kd020, j<=10), kdd010kd010);
+
+scidbtime "DenseGamma(kdd010kd010);"
+scidbtime "DenseGamma(kdd010kd020);"
+scidbtime "DenseGamma(kdd010kd040);"
+scidbtime "DenseGamma(kdd010kd080);"
+scidbtime "DenseGamma(kdd100kd010);"
+scidbtime "DenseGamma(kdd100kd020);"
+scidbtime "DenseGamma(kdd100kd040);"
+scidbtime "DenseGamma(kdd100kd080);"
+scidbtime "DenseGamma(kdd001md010);"
+scidbtime "DenseGamma(kdd001md020);"
+scidbtime "DenseGamma(kdd001md040);"
+scidbtime "DenseGamma(kdd001md080);"
